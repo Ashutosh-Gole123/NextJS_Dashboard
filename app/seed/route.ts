@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import postgres from 'postgres';
 import { invoices, customers, revenue, users } from '../lib/placeholder-data';
 
+import { NextResponse } from 'next/server';
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 async function seedUsers() {
@@ -102,6 +103,9 @@ async function seedRevenue() {
 }
 
 export async function GET() {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Seeding not allowed in production' }, { status: 403 });
+  }
   try {
     const result = await sql.begin((sql) => [
       seedUsers(),
